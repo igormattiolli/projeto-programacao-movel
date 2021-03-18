@@ -1,11 +1,21 @@
-import React from "react";
-import { StyleSheet, View, FlatList, Text, Image } from "react-native";
-import { Feather, Entypo } from "@expo/vector-icons";
+import React, { Component } from "react";
+import FAB from "react-native-fab";
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  Text,
+  Image,
+  StatusBar,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
 import imageTeste from "../../assets/imageteste.png";
+import AlertModal from "../components/AlertModal";
+import HeaderDrawNav from "../components/headerDrawnNav";
 const DATA = [
   {
     id: "1",
-    nameProduct: "First Item",
+    nameProduct: "Cadeira Gamer",
     brandProduct: "ACER",
     amountProduct: 1,
     tagProduct: "Notebook",
@@ -33,43 +43,65 @@ const DATA = [
   },
 ];
 
-class Home extends React.Component {
+export default class Home extends Component {
+  constructor(props) {
+    super(props);
+  }
   render() {
     return (
-      <View style={styles.container}>
-        <FlatList
-          data={DATA}
-          renderItem={({ item }) => (
-            <View style={styles.containerViewFaltList}>
-              <View style={styles.containerRow}>
-                <View style={styles.containerImage}>
-                  <Image source={imageTeste} />
-                </View>
-                <View style={{ width: "70%", borderWidth: 1 }}>
-                  <View
-                    style={{ flexDirection: "row-reverse", paddingVertical: 5 }}
-                  >
+      <>
+        <StatusBar />
+        <HeaderDrawNav navigation={this.props.navigation} />
+        <View style={styles.container}>
+          <FlatList
+            data={DATA}
+            renderItem={({ item }) => (
+              <View style={styles.containerViewFaltList}>
+                <View style={styles.containerRow}>
+                  <View style={styles.containerIcon}>
                     <Feather
                       name="edit"
                       size={24}
                       color="#00A1E7"
-                      style={{ marginHorizontal: 10 }}
+                      style={{ marginHorizontal: 15 }}
+                      onPress={() => {
+                        this.props.navigation.navigate("Cadastro de produtos", {
+                          flag: true,
+                        });
+                      }}
                     />
-                    <Entypo name="trash" size={24} color="red" />
+                    <AlertModal label="o produto" flag={true} />
                   </View>
-                  <Text style={styles.text}>Nome: {item.nameProduct}</Text>
-                  <Text style={styles.text}>Marca: {item.brandProduct}</Text>
-                  <Text style={styles.text}>
-                    Quantidades: {item.amountProduct}
-                  </Text>
-                  <Text style={styles.text}>Tags: {item.tagProduct}</Text>
+                  <View style={styles.containerImage}>
+                    <Image source={imageTeste} />
+                  </View>
+                  <View style={{ width: "70%" }}>
+                    <View style={{ width: "70%" }}>
+                      <Text style={styles.text}>Nome: {item.nameProduct}</Text>
+                    </View>
+                    <Text style={styles.text}>Marca: {item.brandProduct}</Text>
+                    <Text style={styles.text}>
+                      Quantidades: {item.amountProduct}
+                    </Text>
+                    <Text style={styles.text}>Tags: {item.tagProduct}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-          keyExtractor={(_item, index) => index.toString()}
-        />
-      </View>
+            )}
+            keyExtractor={(_item, index) => index.toString()}
+          />
+          <FAB
+            buttonColor="#00A1E7"
+            iconTextColor="#FFFFFF"
+            visible={true}
+            onClickAction={() => {
+              this.props.navigation.navigate("Cadastro de produtos", {
+                flag: false,
+              });
+            }}
+          />
+        </View>
+      </>
     );
   }
 }
@@ -89,21 +121,25 @@ const styles = StyleSheet.create({
     marginTop: 6,
     padding: 10,
     paddingVertical: 20,
+    paddingBottom: 30,
   },
   text: {
     fontSize: 18,
     color: "#00A1E7",
+    fontFamily: "ShadowsIntoLight",
   },
   containerRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    borderWidth: 1,
     width: "100%",
   },
   containerImage: {
-    borderWidth: 1,
     justifyContent: "center",
   },
+  containerIcon: {
+    flexDirection: "row-reverse",
+    paddingVertical: 5,
+    width: "100%",
+    position: "absolute",
+  },
 });
-
-export default Home;

@@ -1,15 +1,14 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+const DefaultButton = ({ label }) => {
+  return (
+    <View style={styles.button}>
+      <Text style={styles.text}>{label}</Text>
+    </View>
+  );
+};
 
-const DefaultButton = ({ label }) => (
-  <View>
-    <TouchableOpacity style={style.button}>
-      <Text style={style.text}>{label}</Text>
-    </TouchableOpacity>
-  </View>
-);
-
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   button: {
     backgroundColor: "#00A1E7",
     padding: 16,
