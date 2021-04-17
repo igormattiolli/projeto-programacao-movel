@@ -12,25 +12,25 @@ import {
 } from "react-native";
 import DefaultButton from "../components/DefaultButton";
 import LogoEasyStock from "../../assets/logo_easy_stock.jpeg";
-import firebase from "firebase";
+import { Login } from "../actions";
+import { connect } from "react-redux";
 
-export default class Login extends Component {
+class LoginPage extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       email: "",
-      senha: "",
+      password: "",
       isLoading: false,
       message: "",
     };
   }
   async login() {
     this.setState({ isLoading: true });
-    const { email, senha } = this.state;
-    await firebase
-      .auth()
-      .signInWithEmailAndPassword(email, senha)
+    const { email, password } = this.state;
+    this.props
+      .Login({ email, password })
       .then(() => {
         this.props.navigation.navigate("Menu");
         this.setState({ isLoading: false });
@@ -71,10 +71,12 @@ export default class Login extends Component {
         <Image source={LogoEasyStock} style={{ height: 100, width: 150 }} />
         <Image style={styles.containerImage} source={Logo} />
         <View style={styles.containerDefault}>
-          <View style={styles.view}>
+          <View style={styles.containerInput}>
             <TextInput
               style={styles.viewInput}
               placeholder="Insira o seu E-mail"
+              keyboardType="email-address"
+              autoCapitalize="none"
               onChangeText={(value) => this.onChangeHandLer("email", value)}
             ></TextInput>
             <Text style={styles.textInput}>E-mail</Text>
@@ -86,7 +88,7 @@ export default class Login extends Component {
               style={styles.viewInput}
               placeholder="Insira a sua Senha"
               secureTextEntry={true}
-              onChangeText={(value) => this.onChangeHandLer("senha", value)}
+              onChangeText={(value) => this.onChangeHandLer("password", value)}
             ></TextInput>
             <Text style={styles.textInput}>Senha</Text>
           </View>
@@ -145,7 +147,7 @@ const styles = StyleSheet.create({
   containerInput: {
     alignItems: "center",
     justifyContent: "center",
-    width: 300,
+    width: "100%",
   },
   viewInput: {
     borderWidth: 2,
@@ -173,3 +175,5 @@ const styles = StyleSheet.create({
     color: "red",
   },
 });
+
+export default connect(null, { Login })(LoginPage);

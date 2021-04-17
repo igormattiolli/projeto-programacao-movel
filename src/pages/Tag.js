@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import DefaultInput from "../components/DefaultInput";
+import { showMessage } from "react-native-flash-message";
 import DefaultButton from "../components/DefaultButton";
 import {
   StyleSheet,
@@ -8,14 +8,45 @@ import {
   StatusBar,
   Dimensions,
   TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
 } from "react-native";
-import HeaderDrawNav from "../components/headerDrawnNav";
-
-export default class Tag extends Component {
+import { connect } from "react-redux";
+import {
+  setFieldTag,
+  saveTag,
+  resetFormTag,
+  setAllFieldsTag,
+} from "../actions";
+class Tag extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      isLoading: false,
+      message: "",
+    };
+  }
+  componentDidMount() {
+    const { setAllFieldsTag, resetFormTag } = this.props;
+    const { params } = this.props.route;
+
+    if (params && params.tagToEdit) {
+      setAllFieldsTag(params.tagToEdit);
+    } else {
+      resetFormTag();
+    }
+  }
+  renderMessage() {
+    const { message } = this.state;
+    if (!message) return null;
+    return (
+      <View>
+        <Text style={styles.errorMessage}>{message}</Text>
+      </View>
+    );
   }
   render() {
+    const { tagForm, setFieldTag, saveTag } = this.props;
     return (
       <>
         <StatusBar />
@@ -25,19 +56,45 @@ export default class Tag extends Component {
               <Text style={styles.textTitle}>Cadastro de tags</Text>
             </View>
             <View style={styles.containerDefault}>
-              <DefaultInput
-                label="Tag"
-                labelPlaceHolder="Insira o nome da tag"
-              />
+              <View style={styles.containerInput}>
+                <TextInput
+                  style={styles.viewInput}
+                  placeholder="Insira o nome da tag"
+                  value={tagForm.tagName}
+                  onChangeText={(value) => setFieldTag("tagName", value)}
+                ></TextInput>
+                <Text style={styles.textInput}>Tag</Text>
+              </View>
             </View>
+            {this.renderMessage()}
             <View style={styles.containerDefault}>
-              <TouchableOpacity
-                onPress={() => {
-                  this.props.navigation.navigate("Menu");
-                }}
-              >
-                <DefaultButton label="Confirmar" />
-              </TouchableOpacity>
+              {this.state.isLoading ? (
+                <ActivityIndicator color="#00A1E7" />
+              ) : (
+                <TouchableOpacity
+                  onPress={async () => {
+                    this.setState({ isLoading: true });
+                    try {
+                      await saveTag(tagForm);
+                      this.props.navigation.navigate("Menu");
+                      showMessage({
+                        description: "Tag",
+                        message: "Tag editada/cadastrada com sucesso",
+                        duration: 5000,
+                        type: "success",
+                      });
+                    } catch {
+                      this.setState({
+                        message: "Erro ao cadastrar/editar tag",
+                      });
+                    } finally {
+                      this.setState({ isLoading: false });
+                    }
+                  }}
+                >
+                  <DefaultButton label="Confirmar" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -78,4 +135,46 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: 150,
   },
+  containerInput: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  viewInput: {
+    borderWidth: 2,
+    borderColor: "#00A1E7",
+    borderRadius: 8,
+    padding: 4,
+    paddingStart: 20,
+    paddingEnd: 20,
+    width: 300,
+    height: 55,
+  },
+  textInput: {
+    color: "#00A1E7",
+    fontSize: 22,
+    position: "absolute",
+    alignSelf: "flex-start",
+    top: -14,
+    left: 25,
+    paddingBottom: 4,
+    backgroundColor: "#FFFFFF",
+    fontFamily: "ShadowsIntoLight",
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: "red",
+  },
 });
+const mapStateToProps = (state) => {
+  return {
+    tagForm: state.tagForm,
+  };
+};
+const mapDispatchToProps = {
+  setFieldTag,
+  saveTag,
+  resetFormTag,
+  setAllFieldsTag,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Tag);

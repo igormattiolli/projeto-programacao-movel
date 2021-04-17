@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import DefaultInput from "../components/DefaultInput";
 import DefaultButton from "../components/DefaultButton";
 import TagModal from "../components/TagModal";
 import { AntDesign } from "@expo/vector-icons";
@@ -9,21 +8,52 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
 } from "react-native";
+import { connect } from "react-redux";
+import { setField, saveProduct, setAllFields, resetForm } from "../actions";
+import { showMessage } from "react-native-flash-message";
 
-export default class Products extends Component {
+class Products extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      flag: false,
+      isLoading: false,
+      message: "",
+    };
+  }
+  componentDidMount() {
+    const { setAllFields, resetForm } = this.props;
+    const { params } = this.props.route;
+
+    if (params && params.productToEdit) {
+      setAllFields(params.productToEdit);
+      this.setState({ flag: true });
+    } else {
+      resetForm();
+    }
+  }
+
+  renderMessage() {
+    const { message } = this.state;
+    if (!message) return null;
+    return (
+      <View>
+        <Text style={styles.errorMessage}>{message}</Text>
+      </View>
+    );
   }
 
   render() {
-    const { flag } = this.props.route.params;
+    const { productForm, setField, saveProduct, navigation } = this.props;
     return (
       <ScrollView>
         <View style={styles.container}>
           <View style={styles.containerBackGround}>
             <View style={styles.containerDefault}>
-              {flag ? (
+              {this.state.flag ? (
                 <Text style={styles.textTitle}>Editar produto</Text>
               ) : (
                 <Text style={styles.textTitle}>Cadastro de Produto</Text>
@@ -43,32 +73,87 @@ export default class Products extends Component {
               </View>
             </View>
             <View style={styles.containerDefault}>
-              <DefaultInput
-                label="Nome"
-                labelPlaceHolder="Insira o nome do produto"
-              />
+              <View style={styles.containerInput}>
+                <TextInput
+                  style={styles.viewInput}
+                  placeholder="Insira o nome do produto"
+                  value={productForm.nameProduct}
+                  onChangeText={(value) => setField("nameProduct", value)}
+                ></TextInput>
+                <Text style={styles.textInput}>Nome</Text>
+              </View>
             </View>
             <View style={styles.containerDefault}>
-              <DefaultInput
-                label="Marca"
-                labelPlaceHolder="Insira a marca do produto"
-              />
+              <View style={styles.containerInput}>
+                <TextInput
+                  style={styles.viewInput}
+                  placeholder="Insira a marca do produto"
+                  value={productForm.brandProduct}
+                  onChangeText={(value) => setField("brandProduct", value)}
+                ></TextInput>
+                <Text style={styles.textInput}>Marca</Text>
+              </View>
             </View>
             <View style={styles.containerDefault}>
-              <DefaultInput
-                label="Quantidade"
-                labelPlaceHolder="Insira a quantidade do produto"
-              />
+              <View style={styles.containerInput}>
+                <TextInput
+                  style={styles.viewInput}
+                  placeholder="Insira a quantidade do produto"
+                  value={productForm.amountProduct}
+                  onChangeText={(value) => setField("amountProduct", value)}
+                  keyboardType="numeric"
+                ></TextInput>
+                <Text style={styles.textInput}>Quantidade</Text>
+              </View>
             </View>
-            <TagModal />
+            <View style={styles.containerModalTag}>
+              <TagModal />
+              <Text style={styles.textTag}>{productForm.tagProduct}</Text>
+            </View>
+            {this.renderMessage()}
             <View style={styles.containerDefault}>
-              <TouchableOpacity
-                onPress={() => {
-                  this.props.navigation.navigate("Menu");
-                }}
-              >
-                <DefaultButton label="Confirmar" />
-              </TouchableOpacity>
+              {this.state.isLoading ? (
+                <ActivityIndicator color="#00A1E7" />
+              ) : (
+                <TouchableOpacity
+                  onPress={async () => {
+                    this.setState({ isLoading: true });
+                    try {
+                      await saveProduct(productForm);
+                      navigation.goBack();
+                      if (this.state.flag) {
+                        showMessage({
+                          description: "Edição de produto",
+                          message: "Produto editado com sucesso",
+                          duration: 5000,
+                          type: "success",
+                        });
+                      } else {
+                        showMessage({
+                          description: "Cadastro de produto",
+                          message: "Produto cadastrado com sucesso",
+                          duration: 5000,
+                          type: "success",
+                        });
+                      }
+                    } catch {
+                      if (this.state.flag) {
+                        this.setState({
+                          message: "Erro ao editar produto",
+                        });
+                      } else {
+                        this.setState({
+                          message: "Erro ao cadastrar produto",
+                        });
+                      }
+                    } finally {
+                      this.setState({ isLoading: false });
+                    }
+                  }}
+                >
+                  <DefaultButton label="Confirmar" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -110,4 +195,57 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#E5E5E5",
   },
+  containerInput: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  viewInput: {
+    borderWidth: 2,
+    borderColor: "#00A1E7",
+    borderRadius: 8,
+    padding: 4,
+    paddingStart: 20,
+    paddingEnd: 20,
+    width: 300,
+    height: 55,
+  },
+  textInput: {
+    color: "#00A1E7",
+    fontSize: 22,
+    position: "absolute",
+    alignSelf: "flex-start",
+    top: -14,
+    left: 25,
+    paddingBottom: 4,
+    backgroundColor: "#FFFFFF",
+    fontFamily: "ShadowsIntoLight",
+  },
+  containerModalTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: 300,
+  },
+  textTag: {
+    fontFamily: "ShadowsIntoLight",
+    color: "#00A1E7",
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: "red",
+  },
 });
+
+const mapStateToProps = (state) => {
+  return {
+    productForm: state.productForm,
+  };
+};
+
+const mapDispatchToProps = {
+  setField,
+  saveProduct,
+  setAllFields,
+  resetForm,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Products);

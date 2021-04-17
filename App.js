@@ -1,8 +1,7 @@
 import React from "react";
 import { registerRootComponent } from "expo";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View, ActivityIndicator } from "react-native";
 import Login from "./src/pages/Login";
-import Home from "./src/pages/Home";
 import Products from "./src/pages/Products";
 import Register from "./src/pages/Register";
 import Tag from "./src/pages/Tag";
@@ -12,7 +11,12 @@ import * as Font from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import firebase from "firebase";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
+import reduxThunk from "redux-thunk";
+import rootReducer from "./src/reducers";
 const Stack = createStackNavigator();
+const store = createStore(rootReducer, applyMiddleware(reduxThunk));
 
 function LogoTitle() {
   return (
@@ -50,7 +54,7 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <>
+      <Provider store={store}>
         {this.state.fontsLoaded ? (
           <NavigationContainer>
             <Stack.Navigator>
@@ -108,8 +112,19 @@ export default class App extends React.Component {
               />
             </Stack.Navigator>
           </NavigationContainer>
-        ) : null}
-      </>
+        ) : (
+          <View
+            style={{
+              width: "100%",
+              height: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ActivityIndicator color="#00A1E7" />
+          </View>
+        )}
+      </Provider>
     );
   }
 }
