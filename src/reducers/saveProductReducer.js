@@ -9,6 +9,7 @@ const INITIAL_STATE = {
   productId: null,
   nameProduct: "",
   brandProduct: "",
+  imageProduct: "",
   amountProduct: "",
   tagProduct: "",
 };

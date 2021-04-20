@@ -78,7 +78,12 @@ class Home extends Component {
                     />
                   </View>
                   <View style={styles.containerImage}>
-                    <Image source={imageTeste} />
+                    <Image
+                      style={styles.img}
+                      source={{
+                        uri: `data:image/jpg;base64,${item.imageProduct}`,
+                      }}
+                    />
                   </View>
                   <View style={{ width: "70%" }}>
                     <View style={{ width: "70%" }}>
@@ -150,12 +155,19 @@ const styles = StyleSheet.create({
   },
   containerImage: {
     justifyContent: "center",
+    marginLeft: 15,
+    marginRight: 35,
   },
   containerIcon: {
     flexDirection: "row-reverse",
     paddingVertical: 5,
     width: "100%",
     position: "absolute",
+  },
+  img: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
   },
 });
 

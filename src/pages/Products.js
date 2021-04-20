@@ -10,8 +10,12 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Alert,
+  Image,
 } from "react-native";
 import { connect } from "react-redux";
+import * as ImagePicker from "expo-image-picker";
+import { Camera } from "expo-camera";
 import { setField, saveProduct, setAllFields, resetForm } from "../actions";
 import { showMessage } from "react-native-flash-message";
 
@@ -22,9 +26,11 @@ class Products extends Component {
       flag: false,
       isLoading: false,
       message: "",
+      isCamera: false,
+      hasPermission: false,
     };
   }
-  componentDidMount() {
+  async componentDidMount() {
     const { setAllFields, resetForm } = this.props;
     const { params } = this.props.route;
 
@@ -33,6 +39,10 @@ class Products extends Component {
       this.setState({ flag: true });
     } else {
       resetForm();
+    }
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status === "granted") {
+      this.setState({ hasPermission: true });
     }
   }
 
@@ -46,7 +56,21 @@ class Products extends Component {
     );
   }
 
-  render() {
+  async viewGaleria() {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
+    });
+
+    if (result) {
+      this.props.setField("imageProduct", result.base64);
+    }
+  }
+
+  viewForm() {
     const { productForm, setField, saveProduct, navigation } = this.props;
     return (
       <ScrollView>
@@ -68,9 +92,45 @@ class Products extends Component {
               }}
             >
               <Text style={styles.textImage}>Enviar imagem de produto</Text>
-              <View style={styles.containerImage}>
-                <AntDesign name="pluscircle" size={50} color="#00A1E7" />
-              </View>
+              {productForm.imageProduct ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.viewGaleria();
+                  }}
+                >
+                  <Image
+                    source={{
+                      uri: `data:image/jpg;base64,${productForm.imageProduct}`,
+                    }}
+                    style={styles.img}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.containerImage}>
+                  <AntDesign
+                    onPress={() => {
+                      Alert.alert(
+                        "Inserir imagem",
+                        "Escolher imagem a partir da galeria",
+                        [
+                          {
+                            text: "Sair",
+                          },
+                          {
+                            text: "Galeria",
+                            onPress: () => {
+                              this.viewGaleria();
+                            },
+                          },
+                        ]
+                      );
+                    }}
+                    name="pluscircle"
+                    size={50}
+                    color="#00A1E7"
+                  />
+                </View>
+              )}
             </View>
             <View style={styles.containerDefault}>
               <View style={styles.containerInput}>
@@ -160,6 +220,10 @@ class Products extends Component {
       </ScrollView>
     );
   }
+
+  render() {
+    return this.viewForm();
+  }
 }
 const styles = StyleSheet.create({
   container: {
@@ -232,6 +296,30 @@ const styles = StyleSheet.create({
   errorMessage: {
     fontSize: 16,
     color: "red",
+  },
+  img: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+  },
+  viewCamera: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "black",
+  },
+  preview: {
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  capture: {
+    flex: 0,
+    backgroundColor: "#ffff",
+    borderRadius: 5,
+    padding: 15,
+    paddingHorizontal: 20,
+    alignSelf: "center",
+    margin: 20,
   },
 });
 

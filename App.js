@@ -1,4 +1,5 @@
 import React from "react";
+import { LogBox } from "react-native";
 import { registerRootComponent } from "expo";
 import { Image, StyleSheet, View, ActivityIndicator } from "react-native";
 import Login from "./src/pages/Login";
@@ -39,17 +40,20 @@ export default class App extends React.Component {
 
   componentDidMount() {
     this.loadFonts();
-    var firebaseConfig = {
-      apiKey: "AIzaSyB7hQGPYJX1-KxmAbAU0eIQ8kjwM2GdoIE",
-      authDomain: "projetomobile-63ea7.firebaseapp.com",
-      projectId: "projetomobile-63ea7",
-      storageBucket: "projetomobile-63ea7.appspot.com",
-      messagingSenderId: "60018478999",
-      appId: "1:60018478999:web:5e22c3b75cb2844b163ed2",
-      measurementId: "G-5Q02XKY3ZZ",
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+    LogBox.ignoreAllLogs();
+    if (!firebase.apps.length) {
+      var firebaseConfig = {
+        apiKey: "AIzaSyB7hQGPYJX1-KxmAbAU0eIQ8kjwM2GdoIE",
+        authDomain: "projetomobile-63ea7.firebaseapp.com",
+        projectId: "projetomobile-63ea7",
+        storageBucket: "projetomobile-63ea7.appspot.com",
+        messagingSenderId: "60018478999",
+        appId: "1:60018478999:web:5e22c3b75cb2844b163ed2",
+        measurementId: "G-5Q02XKY3ZZ",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    }
   }
 
   render() {
