@@ -159,7 +159,8 @@ const styles = StyleSheet.create({
     marginRight: 35,
   },
   containerIcon: {
-    flexDirection: "row-reverse",
+    flexDirection: "row",
+    marginLeft: 250,
     paddingVertical: 5,
     width: "100%",
     position: "absolute",
